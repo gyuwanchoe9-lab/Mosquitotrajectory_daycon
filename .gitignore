@@ -1,0 +1,24 @@
+# Data
+train/
+test/
+train_labels.csv
+sample_submission.csv
+
+# Outputs
+outputs/
+
+# Claude memory
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
