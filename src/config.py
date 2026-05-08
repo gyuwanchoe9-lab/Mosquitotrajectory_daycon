@@ -12,8 +12,6 @@ class Config:
     submission_file: str = "sample_submission.csv"
     output_dir: Path = Path("outputs")
 
-    # Model selection: "lstm" 
-    model_type: str = "lstm"
     device: str = "cuda"
 
     # LSTM hyperparameters

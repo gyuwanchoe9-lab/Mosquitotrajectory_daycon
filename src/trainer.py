@@ -16,7 +16,7 @@ class Trainer:
     ):
         self.model = model
         self.optimizer = optimizer
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.HuberLoss(delta=0.01)
         self.device = device
         self.r_hit = r_hit
 

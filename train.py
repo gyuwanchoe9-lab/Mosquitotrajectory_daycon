@@ -54,7 +54,7 @@ def main():
 
     model = build_model(cfg).to(device)
 
-    optimizer = torch.optim.Adam(
+    optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg.learning_rate,
         weight_decay=cfg.weight_decay,
