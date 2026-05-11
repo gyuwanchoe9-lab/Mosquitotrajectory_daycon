@@ -14,12 +14,15 @@ class Config:
 
     device: str = "cuda"
 
-    # LSTM hyperparameters
-    input_size: int = 9  # rel_xyz + vel_xyz + acc_xyz
+    # Model selection: "gru_selector" or "lstm"
+    model_type: str = "gru_selector"
+
+    # Shared hyperparameters
+    input_size: int = 9    # seq features per timestep
     hidden_size: int = 128
     num_layers: int = 2
     dropout: float = 0.2
-
+    n_candidates: int = 27
 
     # Training hyperparameters
     epochs: int = 100

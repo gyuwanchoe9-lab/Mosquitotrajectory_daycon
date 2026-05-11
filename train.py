@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import pandas as pd
 import torch
@@ -12,7 +14,17 @@ from src.utils import get_device, set_seed
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--model_type", type=str, default=None)
+    args = parser.parse_args()
+
     cfg = Config()
+    if args.seed is not None:
+        cfg.seed = args.seed
+    if args.model_type is not None:
+        cfg.model_type = args.model_type
+
     set_seed(cfg.seed)
     device = get_device(cfg.device)
     cfg.output_dir.mkdir(exist_ok=True)
@@ -65,6 +77,7 @@ def main():
 
     trainer = Trainer(model, optimizer, device, r_hit=cfg.r_hit)
 
+    ckpt_name = f"best_model_{cfg.model_type}_seed{cfg.seed}.pt"
     best_hit_rate = 0.0
     for epoch in range(1, cfg.epochs + 1):
         train_loss = trainer.train_epoch(train_loader)
@@ -80,19 +93,10 @@ def main():
 
         if hit_rate > best_hit_rate:
             best_hit_rate = hit_rate
-            torch.save(
-                model.state_dict(),
-                cfg.output_dir / "best_model.pt",
-            )
-            print(
-                f"  -> Saved best model "
-                f"(hit_rate={hit_rate:.4f})"
-            )
+            torch.save(model.state_dict(), cfg.output_dir / ckpt_name)
+            print(f"  -> Saved {ckpt_name} (hit_rate={hit_rate:.4f})")
 
-    print(
-        f"\nTraining complete. "
-        f"Best Hit Rate: {best_hit_rate:.4f}"
-    )
+    print(f"\nTraining complete. Best Hit Rate: {best_hit_rate:.4f}")
 
 
 if __name__ == "__main__":

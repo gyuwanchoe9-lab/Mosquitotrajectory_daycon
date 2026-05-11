@@ -23,39 +23,33 @@ class Trainer:
     def train_epoch(self, loader: DataLoader) -> float:
         self.model.train()
         total_loss = 0.0
-        for x, y in loader:
-            x = x.to(self.device)
+        for seq_feat, candidates, y in loader:
+            seq_feat = seq_feat.to(self.device)
+            candidates = candidates.to(self.device)
             y = y.to(self.device)
             self.optimizer.zero_grad()
-            pred = self.model(x)
+            pred = self.model(seq_feat, candidates)
             loss = self.criterion(pred, y)
             loss.backward()
             self.optimizer.step()
-            total_loss += loss.item() * x.size(0)
+            total_loss += loss.item() * seq_feat.size(0)
         return total_loss / len(loader.dataset)
 
     @torch.no_grad()
-    def evaluate(
-        self, loader: DataLoader
-    ) -> Tuple[float, float]:
+    def evaluate(self, loader: DataLoader) -> Tuple[float, float]:
         self.model.eval()
         total_loss = 0.0
-        all_preds = []
-        all_targets = []
-        for x, y in loader:
-            x = x.to(self.device)
+        all_preds, all_targets = [], []
+        for seq_feat, candidates, y in loader:
+            seq_feat = seq_feat.to(self.device)
+            candidates = candidates.to(self.device)
             y = y.to(self.device)
-            pred = self.model(x)
-            loss = self.criterion(pred, y)
-            total_loss += loss.item() * x.size(0)
+            pred = self.model(seq_feat, candidates)
+            total_loss += self.criterion(pred, y).item() * seq_feat.size(0)
             all_preds.append(pred.cpu().numpy())
             all_targets.append(y.cpu().numpy())
 
-        val_loss = total_loss / len(loader.dataset)
-
-        preds = np.concatenate(all_preds, axis=0)
-        targets = np.concatenate(all_targets, axis=0)
+        preds = np.concatenate(all_preds)
+        targets = np.concatenate(all_targets)
         dist = np.linalg.norm(preds - targets, axis=1)
-        hit_rate = float(np.mean(dist <= self.r_hit))
-
-        return val_loss, hit_rate
+        return total_loss / len(loader.dataset), float(np.mean(dist <= self.r_hit))
